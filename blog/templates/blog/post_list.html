@@ -79,7 +79,7 @@
         <div class="col-md-8 col-lg-9">
           <h2>Blog</h2>
           <!-- Featured blog post-->
-          {% for p in post_list %}
+          {% for p in post_list %}   <!--약속된 postlist를 변수 p로 받았기 때문.-->
           <div class="card mb-4">
             {% if p.head_image %}
             <img class="card-img-top" src="{{p.head_image.url}}" alt="{{p}}의 head_image" />
@@ -87,12 +87,15 @@
             <img class="card-img-top" src="https://picsum.photos/seed/{{p.pk}}/800/200" alt="random image" />
             {% endif %}
             <div class="card-body">
-                <h2 class="card-title">{{p.title}}</h2>
-                <p class="card-text">{{p.content}}</p>
+                <h2 class="card-title">{{p.title | upper}}</h2>
+                {% if p.hook_text %}
+                <h5 class="text-muted">{{p.hook_text}}</h5>   <!--models에 있는 필드명과 같아야 함.-->
+                {% endif %}
+                <p class="card-text">{{p.content | truncatechars:100 }}</p>
                 <a class="btn btn-primary" href="{{p.get_absolute_url}}">Read more →</a>
             </div>
             <div class="card-footer">
-                <div class="small text-muted">{{p.created_at}}</div>
+                <div class="small text-muted">{{p.created_at | date:"Y-m-d h:m:s"}}</div>
                 <a href="#">작성자(추후 개발 예정)</a>
             </div>
           </div>
