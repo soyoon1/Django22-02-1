@@ -57,7 +57,7 @@ class  TestView(TestCase):
         self.assertIn(post_001.title, soup.title.text)
 
         main_area=soup.find('div', id='main-area')
-        #post_area=soup.find('div', id='post-area')  한번 찾고 또 처음으로 가서 다시 찾음
+        #post_area=soup.find('div', id='post-area')  한 번 찾고 또 처음으로 가서 다시 찾음
         post_area = main_area.find('div', id='post-area')
         self.assertIn(post_001.title, post_area.text)
         self.assertIn(post_001.content, post_area.text)
