@@ -3,6 +3,16 @@ from django.contrib.auth.models import User  # 작성자 할 때 추가
 import os
 
 # Create your models here.
+class Tag(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+    slug = models.SlugField(max_length=200, unique=True, allow_unicode=True)
+
+    def __str__(self):
+        return self.name
+
+    def get_absolute_url(self):  # IP주소/blog/tag/slug
+        return f'/blog/tag/{self.slug}/'
+
 class Category(models.Model):
     name = models.CharField(max_length=50, unique=True)
     slug = models.SlugField(max_length=200, unique=True, allow_unicode=True)
@@ -32,6 +42,7 @@ class Post(models.Model):
     author = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
 
     category = models.ForeignKey(Category, null=True, blank=True, on_delete=models.SET_NULL) # null은 null이라는 값을 넣을수 있는것..  blank가 있어야 카테고리없는 거 허용
+    tags = models.ManyToManyField(Tag, blank=True) # null = True 포함되어 있어서 적을 필요없음 on_delete도 마찬가지임.
 
     def __str__(self):
         return f'[{self.pk}]{self.title}:: {self.author} : {self.created_at}'

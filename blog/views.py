@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .models import Post, Category                             # 카테고리부분
+from .models import Post, Category, Tag                             # 카테고리부분
 from django.views.generic import ListView, DetailView
 
 # Create your views here.
@@ -37,6 +37,16 @@ def category_page(request, slug):
         'post_list' : post_list,
         'categories' : Category.objects.all(),
         'no_category_post_count' : Post.objects.filter(category=None).count
+    })
+
+def tag_page(request, slug):
+    tag = Tag.objects.get(slug=slug)
+    post_list = tag.post_set.all()
+    return render(request, 'blog/post_list.html', {
+        'tag' : tag,
+        'post_list': post_list,
+        'categories': Category.objects.all(),
+        'no_category_post_count': Post.objects.filter(category=None).count
     })
 
     # 템플릿 모델명_detail.html : post_detail.html
