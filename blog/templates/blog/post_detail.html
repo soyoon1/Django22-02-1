@@ -10,7 +10,7 @@
                         <!-- Post header 8개, 4개 해서 가로 12개로 나눌 수 있음. -->
                         <header class="mb-4">
                             <!-- Post title-->
-                            <h1 class="fw-bolder mb-1">{{post.title | lower}}</h1>
+                            <h1 class="fw-bolder mb-1">{{post.title | lower}}</h1>   <!--소문자로 출력하기-->
                             {% if post.hook_text %}
                             <h5 class="text-muted">{{post.hook_text}}</h5>
                             {% endif %}
@@ -19,8 +19,17 @@
                                 Posted on {{post.created_at | date:"Y-m-d h:m:s"}} by {{post.author | upper}}
                             </div>
                             <!-- Post categories-->
-                            <a class="badge bg-secondary text-decoration-none link-light" href="#!">Web Design</a>
-                            <a class="badge bg-secondary text-decoration-none link-light" href="#!">Freebies</a>
+                            {% if post.category %}
+                                <a class="badge bg-secondary text-decoration-none link-light"
+                                   href="{{post.category.get_absolute_url}}">
+                                    {{post.category}}
+                                </a>
+                            {% else %}
+                                <a class="badge bg-secondary text-decoration-none link-light"
+                                   href="/blog/category/no_category/">
+                                    미분류
+                                </a>
+                            {% endif %}
                         </header>
                         <!-- Preview image figure-->
                         <figure class="mb-4">
