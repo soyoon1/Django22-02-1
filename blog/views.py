@@ -1,8 +1,31 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from .models import Post, Category, Tag                             # 카테고리부분
-from django.views.generic import ListView, DetailView
+from django.views.generic import ListView, DetailView, CreateView
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 
 # Create your views here.
+class PostCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
+    model = Post
+    fields = ['title','hook_text', 'content', 'head_image', 'file_upload','category']
+
+    def test_func(self):
+        return self.request.user.is_superuser or self.request.user.is_staff
+
+    def form_valid(self, form):
+        current_user = self.request.user
+        if current_user.is_authenticated and (current_user.is_superuser or current_user.is_staff):
+            form.instance.author = current_user
+            return super(PostCreate, self).form_valid(form)
+        else:
+            return redirect('/blog/')
+
+    # 템플릿 : 모델명_form.html
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super(PostCreate, self).get_context_data()
+        context['categories'] = Category.objects.all()                                   # 카테고리부분 사이드바 내용 위해 추가해줌.
+        context['no_category_post_count'] = Post.objects.filter(category=None).count
+        return context
+
 class PostList(ListView):
     model = Post
     ordering = '-pk' # 모델 이름만 설정하면 자동 호출 pk값이 작은 순서대로 보여달란 뜻임.
