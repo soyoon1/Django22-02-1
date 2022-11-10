@@ -42,7 +42,7 @@ class Post(models.Model):
     author = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
 
     category = models.ForeignKey(Category, null=True, blank=True, on_delete=models.SET_NULL) # null은 null이라는 값을 넣을수 있는것..  blank가 있어야 카테고리없는 거 허용
-    tags = models.ManyToManyField(Tag, blank=True) # null = True 포함되어 있어서 적을 필요없음 on_delete도 마찬가지임.
+    tags = models.ManyToManyField(Tag, null=True, blank=True) # null = True 포함되어 있어서 적을 필요없음 on_delete도 마찬가지임.
 
     def __str__(self):
         return f'[{self.pk}]{self.title}:: {self.author} : {self.created_at}'

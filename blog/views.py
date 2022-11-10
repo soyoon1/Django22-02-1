@@ -3,11 +3,12 @@ from .models import Post, Category, Tag                             # 카테고�
 from django.views.generic import ListView, DetailView, CreateView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.exceptions import PermissionDenied
+from django.utils.text import slugify
 
 # Create your views here.
 class PostUpdate(LoginRequiredMixin, UpdateView):
     model = Post
-    fields = ['title', 'hook_text', 'content', 'head_image', 'file_upload', 'category', 'tags']
+    fields = ['title', 'hook_text', 'content', 'head_image', 'file_upload', 'category']  # , 'tags'
 
     template_name = 'blog/post_update_form.html' # 클래스에서도 직접적으로 템플릿을 부를 수 있다.
 
@@ -17,15 +18,37 @@ class PostUpdate(LoginRequiredMixin, UpdateView):
         else:
             raise PermissionDenied
 
+    def form_valid(self, form):
+        response = super(PostUpdate, self).form_valid(form)
+        self.object.tags.clear()
+        tags_str = self.request.POST.get('tags_str')
+        if tags_str:
+            tags_str = tags_str.strip()
+            tags_str = tags_str.replace(',', ';')
+            tags_list = tags_str.split(';')
+            for t in tags_list:
+                t = t.strip()
+                tag, is_tag_created = Tag.objects.get_or_create(name=t)  # 태그 기존에 있는 거 가져오든지 아님 새로 만드는 행동함.
+                if is_tag_created:
+                    tag.slug = slugify(t, allow_unicode=True)  # 슬러그까지 추가해서 저장.
+                    tag.save()
+                self.object.tags.add(tag)
+        return response
+
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super(PostUpdate, self).get_context_data()
+        if self.object.tags.exists():
+            tags_str_list = list()                # string 배열들로 만들고 하나의 string으로 만듦.
+            for t in self.object.tags.all():
+                tags_str_list.append(t.name)
+            context['tags_str_default'] = ';'.join(tags_str_list)      # 다 합쳐서 각각을 ;으로 구분하게 만듦.
         context['categories'] = Category.objects.all()                                   # 카테고리부분 사이드바 내용 위해 추가해줌.
         context['no_category_post_count'] = Post.objects.filter(category=None).count
         return context
 
 class PostCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     model = Post
-    fields = ['title','hook_text', 'content', 'head_image', 'file_upload','category']
+    fields = ['title','hook_text', 'content', 'head_image', 'file_upload','category'] # , 'tags' 태그 구분 딜리미터 , ; 만 씀.
 
     def test_func(self):
         return self.request.user.is_superuser or self.request.user.is_staff
@@ -34,7 +57,20 @@ class PostCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         current_user = self.request.user
         if current_user.is_authenticated and (current_user.is_superuser or current_user.is_staff):
             form.instance.author = current_user
-            return super(PostCreate, self).form_valid(form)
+            response = super(PostCreate, self).form_valid(form)
+            tags_str = self.request.POST.get('tags_str') # POST 우리가 쓰고 있는 모델명이 아니라 사용자가 request할 떄 URL없이 비교적 긴 데이터 전달할 때 쓰는 전달 방식
+            if tags_str :
+                tags_str = tags_str.strip()
+                tags_str = tags_str.replace(',',';')
+                tags_list = tags_str.split(';')
+                for t in tags_list:
+                    t = t.strip()
+                    tag, is_tag_created = Tag.objects.get_or_create(name=t)       # 태그 기존에 있는 거 가져오든지 아님 새로 만드는 행동함.
+                    if is_tag_created:
+                        tag.slug = slugify(t, allow_unicode = True)               # 슬러그까지 추가해서 저장.
+                        tag.save()
+                    self.object.tags.add(tag)
+            return response
         else:
             return redirect('/blog/')
 

@@ -11,6 +11,10 @@
     {% csrf_token %} <!--csrf공격 막기 위함.-->
     <table>
       {{form}}
+      <tr>
+        <th><label for="id_tags">Tags:</label></th>
+        <td><input type="text" id="id_tags" name="tags_str"></td>
+      </tr>
     </table>
     <button type="submit" class="btn btn-primary float-right">Submit</button>
   </form>
