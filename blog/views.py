@@ -4,6 +4,8 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.exceptions import PermissionDenied
 from django.utils.text import slugify
+from .forms import CommentForm
+from django.shortcuts import get_object_or_404
 
 # Create your views here.
 class PostUpdate(LoginRequiredMixin, UpdateView):
@@ -101,6 +103,7 @@ class PostDetail(DetailView):
         context = super(PostDetail, self).get_context_data()    # 슈퍼 해당되는 내용 PostDetail임을 명심하자
         context['categories'] = Category.objects.all()
         context['no_category_post_count'] = Post.objects.filter(category=None).count
+        context['comment_form'] = CommentForm
         return context
 
 def category_page(request, slug):
@@ -129,6 +132,22 @@ def tag_page(request, slug):
 
     # 템플릿 모델명_detail.html : post_detail.html
     # 파라미터 모델명 : post
+
+def new_comment(request, pk):
+    if request.user.is_authenticated:
+        post = get_object_or_404(Post, pk=pk)
+        if request.method == 'POST':
+            comment_form = CommentForm(request.POST)
+            if comment_form.is_valid():
+                comment = comment_form.save(commit=False)
+                comment.post = post
+                comment.author = request.user
+                comment.save()
+                return redirect(comment.get_absolute_url())
+        else: # GET
+            return redirect(post.get_absolute_url())
+    else:
+        raise PermissionDenied
 
 # CBV방식에는 이게 필요함. 글 여러개 나타낼 때 필요 for문에서 post
 #def index(request):
