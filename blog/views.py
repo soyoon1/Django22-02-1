@@ -87,6 +87,7 @@ class PostCreate(LoginRequiredMixin, UserPassesTestMixin, CreateView):
 class PostList(ListView):
     model = Post
     ordering = '-pk' # 모델 이름만 설정하면 자동 호출 pk값이 작은 순서대로 보여달란 뜻임.
+    paginate_by = 5 # 페이지네이션, 내용 나눠서 보여주는 것
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super(PostList, self).get_context_data()
