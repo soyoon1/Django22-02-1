@@ -96,7 +96,7 @@
                                 {% for comment in post.comment_set.iterator %}
                                 <!-- Single comment-->
                                 <div class="media d-flex" id="comment-{{comment.pk}}">
-                                    <img class="mr-3 rounded-circle" src="https://dummyimage.com/50x50/ced4da/6c757d.jpg" alt="..." />
+                                    <img class="mr-3 rounded-circle" src="{{comment.get_avatar_url}}" alt="{{comment.author}}" width="60px" />
                                     <div class="media-body ms-3">
                                         {% if user.is_authenticated and comment.author == user %}
                                             <a role="button" class="btn btn-sm btn-info float-right"
