@@ -60,6 +60,13 @@ class Post(models.Model):
         # c.xlsx -> c xlsx
         # a.b.c.txt -> a b c txt
 
+    def get_avatar_url(self):
+        if self.author.socialaccount_set.exists():
+            return self.author.socialaccount_set.first().get_avatar_url()
+        else:
+            return 'https://dummyimage.com/50x50/ced4da/6c757d.jpg'
+
+
 class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE)    # 왜 다대일 관계인지 다시 생각해보기.
     author = models.ForeignKey(User, on_delete=models.CASCADE)
